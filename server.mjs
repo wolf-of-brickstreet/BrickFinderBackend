@@ -9,6 +9,9 @@ const config = JSON.parse(fs.readFileSync(new URL('./config.json', import.meta.u
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const __dataFolder = path.resolve('./data');
+const __colorsFile = path.join(__dataFolder, 'bricklink-colors.json');
+
 const app = express();
 app.use(cors());
 app.use(express.text({ type: 'application/xml' }));
@@ -26,6 +29,22 @@ app.post('/save-xml', (req, res) => {
     }
     console.log(`✅ XML gespeichert unter: ${resolvedPath}`);
     res.send('XML gespeichert');
+  });
+});
+
+app.get('/colors', (req, res) => {
+  fs.readFile(__colorsFile, 'utf-8', (err, data) => {
+    if (err) {
+      console.error('Fehler beim Lesen der Farben:', err);
+      return res.status(500).json({ error: 'Fehler beim Laden der Farben' });
+    }
+    try {
+      const colors = JSON.parse(data);
+      res.json(colors);
+    } catch (parseErr) {
+      console.error('Fehler beim Parsen der Farben:', parseErr);
+      res.status(500).json({ error: 'Fehler beim Verarbeiten der Farbdaten' });
+    }
   });
 });
 
