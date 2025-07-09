@@ -3,6 +3,7 @@ import fs from 'fs';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url'; 
+import { parseStringPromise, Builder } from 'xml2js';
 
 const config = JSON.parse(fs.readFileSync(new URL('./config.json', import.meta.url)));
 
@@ -46,6 +47,49 @@ app.get('/colors', (req, res) => {
       res.status(500).json({ error: 'Fehler beim Verarbeiten der Farbdaten' });
     }
   });
+});
+
+function deepEqual(obj1, obj2) {
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+  if (keys1.length !== keys2.length) return false;
+
+  return keys1.every(key => {
+    const val1 = obj1[key];
+    const val2 = obj2[key];
+
+    if (Array.isArray(val1) && Array.isArray(val2)) {
+      return val1.length === val2.length && val1.every((v, i) => v === val2[i]);
+    }
+
+    return val1 === val2;
+  });
+}
+
+// Route zum Löschen eines Items anhand aller Eigenschaften
+app.post('/delete-item', async (req, res) => {
+  const itemToDelete = req.body;
+
+  try {
+    const xmlData = fs.readFileSync(resolvedPath, 'utf8');
+    const parsedXml = await parseStringPromise(xmlData);
+
+    const items = parsedXml?.BrickStore?.Items?.[0]?.Item || [];
+
+    const filteredItems = items.filter(item => !deepEqual(item, itemToDelete));
+
+    parsedXml.BrickStore.Items[0].Item = filteredItems;
+
+    const builder = new Builder();
+    const updatedXml = builder.buildObject(parsedXml);
+
+    fs.writeFileSync(resolvedPath, updatedXml, 'utf8');
+
+    res.send({ success: true, message: 'Eintrag gelöscht (wenn vorhanden).' });
+  } catch (err) {
+    console.error('Fehler beim Löschen aus XML:', err);
+    res.status(500).send({ success: false, error: 'Fehler beim Löschen.' });
+  }
 });
 
 app.listen(3001, () => console.log('📡 Server läuft auf Port 3001'));
