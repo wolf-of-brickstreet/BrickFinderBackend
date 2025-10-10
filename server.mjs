@@ -91,6 +91,7 @@ app.delete('/delete-item', async (req, res) => {
 });
 
 app.get('/inventory', (req, res) => {
+  console.log("Loading " + resolvedPath);
   res.sendFile(resolvedPath);
 });
 
