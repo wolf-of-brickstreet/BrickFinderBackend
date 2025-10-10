@@ -90,4 +90,9 @@ app.delete('/delete-item', async (req, res) => {
   }
 });
 
+app.get('/inventory', (req, res) => {
+  const filePath = path.resolve('./Data/TestBrickstore.bsx');
+  res.sendFile(filePath);
+});
+
 app.listen(3001, () => console.log('📡 Server läuft auf Port 3001'));
