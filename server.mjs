@@ -34,6 +34,11 @@ app.post('/save-xml', (req, res) => {
   });
 });
 
+app.get('/getInventory', (req, res) => {
+  console.log("Loading " + resolvedPath);
+  res.sendFile(resolvedPath);
+});
+
 app.get('/colors', (req, res) => {
   fs.readFile(__colorsFile, 'utf-8', (err, data) => {
     if (err) {
@@ -88,11 +93,6 @@ app.delete('/delete-item', async (req, res) => {
     console.error('Fehler beim Löschen des Items:', err);
     res.status(500).json({ error: 'Fehler beim Löschen des Items' });
   }
-});
-
-app.get('/inventory', (req, res) => {
-  console.log("Loading " + resolvedPath);
-  res.sendFile(resolvedPath);
 });
 
 app.listen(3001, () => console.log('📡 Server läuft auf Port 3001'));
