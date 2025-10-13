@@ -36,7 +36,16 @@ app.post('/save-xml', (req, res) => {
 
 app.get('/getInventory', (req, res) => {
   console.log("Loading " + resolvedPath);
-  res.sendFile(resolvedPath);
+  fs.readFile(resolvedPath, 'utf8', (err, data) => {
+    if (err) {
+      console.error("❌ Fehler beim Lesen der XML-Datei:", err);
+      return res.status(500).send("Fehler beim Lesen der XML-Datei");
+    }
+
+    // Optional: Falls du sicherstellen willst, dass es als Text kommt
+    res.setHeader('Content-Type', 'text/xml');
+    res.send(data);
+  });
 });
 
 app.get('/colors', (req, res) => {
